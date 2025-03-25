@@ -1,0 +1,6 @@
+- [ ] Créer interface d'accueil avec liste des documents
+- [ ] Implémenter CRUD basique (ajouter/supprimer/éditer documents)
+- [ ] Créer interface document à deux onglets (métadonnées/contenu)
+- [ ] Ajouter système d'entités avec niveau de certitude
+- [ ] Développer fonction d'alignement d'entités avec le graphe existant
+- [ ] Implémenter fusion des graphes
