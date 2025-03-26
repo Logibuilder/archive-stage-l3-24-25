@@ -3,12 +3,10 @@ import { createRoot } from 'react-dom/client'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import './index.css'
 import Header from './components/Header'
-
-// Placeholder pages
-const placeholder = (name: string) => {
-  console.log(`Navigate to: ${name}`);
-  return <h1>{name}</h1>;
-}
+import Ajouter from './components/pages/Ajouter'
+import Accueil from './components/pages/Accueil'
+import Supprimer from './components/pages/Supprimer'
+import Editer from './components/pages/Editer'
 
 function App() {
   return (
@@ -16,10 +14,10 @@ function App() {
       <Header />
       <main style={{ padding: '1rem' }}>
         <Routes>
-          <Route path="/" element={placeholder('Interface DHFC')} />
-          <Route path="/ajouter" element={placeholder('Ajouter')} />
-          <Route path="/supprimer" element={placeholder('Supprimer')} />
-          <Route path="/editer" element={placeholder('Éditer')} />
+          <Route path="/" element={Accueil()} />
+          <Route path="/ajouter" element={Ajouter()} />
+          <Route path="/supprimer" element={Supprimer()} />
+          <Route path="/editer" element={Editer()} />
         </Routes>
       </main>
     </BrowserRouter>
