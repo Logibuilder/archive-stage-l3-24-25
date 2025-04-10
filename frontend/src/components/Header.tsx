@@ -24,7 +24,7 @@ const buttonStyle: React.CSSProperties = {
 
 // Component
 
-function Header(): React.ReactElement {
+export default function Header(): React.ReactElement {
     const navigate = useNavigate();
 
     const buttonNavigation = (text: string, path: string) => {
@@ -48,5 +48,3 @@ function Header(): React.ReactElement {
         </header>
     );
 };
-
-export default Header;

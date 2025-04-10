@@ -1,4 +1,4 @@
-function Accueil(): React.ReactElement {
+export default function Accueil(): React.ReactElement {
     return (
         <div>
             <h1>Accueil</h1>
@@ -7,5 +7,3 @@ function Accueil(): React.ReactElement {
         </div>
     );
 }
-
-export default Accueil;

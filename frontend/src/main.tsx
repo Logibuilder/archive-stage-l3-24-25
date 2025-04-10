@@ -14,10 +14,10 @@ function App() {
       <Header />
       <main style={{ padding: '1rem' }}>
         <Routes>
-          <Route path="/" element={Accueil()} />
-          <Route path="/ajouter" element={Ajouter()} />
-          <Route path="/supprimer" element={Supprimer()} />
-          <Route path="/editer" element={Editer()} />
+          <Route path="/" element={<Accueil />} />
+          <Route path="/ajouter" element={<Ajouter />} />
+          <Route path="/supprimer" element={<Supprimer />} />
+          <Route path="/editer" element={<Editer />} />
         </Routes>
       </main>
     </BrowserRouter>

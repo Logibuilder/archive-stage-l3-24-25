@@ -1,21 +1,18 @@
-interface DocumentMetadata {
+interface DHFC_DocumentMetadata {
     name: string;
     author: string;
-    date: Date;
+    date: Date | null
 }
 
-interface Document {
-    metadata: DocumentMetadata;
+export interface DHFC_Document {
+    id: string;
+    metadata: DHFC_DocumentMetadata;
     content: {
-        entities: Entity[];
+        entities: DHFC_Entity[];
     };
 }
 
-interface Entity {
+export interface DHFC_Entity {
     type: string;
     data: any;
 }
-
-// Export for usage elsewhere
-export { Document };
-export { Entity };
