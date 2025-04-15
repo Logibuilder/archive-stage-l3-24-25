@@ -27,7 +27,7 @@ function SelectDoc() {
                 onChange={(e) => {
                     const selectedId = e.target.value;
                     if (selectedId) {
-                        const document = documents.find(doc => doc.id === selectedId);
+                        const document = documents[selectedId];
                         setWantedDoc(document!);
                     } else {
                         setWantedDoc(null);
@@ -35,7 +35,7 @@ function SelectDoc() {
                 }}
             >
                 <option value="">-- Sélectionner un document --</option>
-                {documents.map(doc => (
+                {Object.values(documents).map(doc => (
                     <option key={doc.id} value={doc.id}>
                         {doc.metadata.name} : {doc.metadata.author}
                     </option>

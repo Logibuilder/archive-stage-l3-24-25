@@ -10,7 +10,7 @@ export default function Supprimer() {
     const handleDocumentChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
         const selectedId = event.target.value;
         if (selectedId) {
-            const document = documents.find(doc => doc.id === selectedId);
+            const document = documents[selectedId];
             setSelectedDocument(document!);
         } else {
             setSelectedDocument(null);
@@ -47,7 +47,7 @@ export default function Supprimer() {
                     value={selectedDocument?.id || ""}
                 >
                     <option value="">-- Sélectionner un document --</option>
-                    {documents.map(doc => (
+                    {Object.values(documents).map(doc => (
                         <option key={doc.id} value={doc.id}>
                             {doc.metadata.name} : {doc.metadata.author}
                         </option>

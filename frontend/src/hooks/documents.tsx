@@ -4,7 +4,7 @@ import config from "../config";
 import { fake_data } from "../utils";
 
 export function useGetDocuments() {
-    const [documents, setDocuments] = useState<DHFC_Document[]>([]);
+    const [documents, setDocuments] = useState<Record<string, DHFC_Document>>({});
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [refresh, setRefresh] = useState(false);
@@ -17,7 +17,7 @@ export function useGetDocuments() {
         (async () => {
             try {
                 if (config.FAKE_DATA) {
-                    setDocuments(Object.values(fake_data));
+                    setDocuments(fake_data);
                 } else {
                     const response = await fetch(`${config.API_URL}/documents`);
                     if (!response.ok) {
