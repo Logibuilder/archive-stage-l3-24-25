@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { getDocuments } from "../../utils";
 import { DHFC_Document } from '../../types';
+import { useDeleteDocument, useGetDocuments } from '../../hooks/documents';
 
 export default function Supprimer() {
     const [selectedDocument, setSelectedDocument] = useState<DHFC_Document | null>(null);
-    const documents = getDocuments();
-    
+    const { documents, refreshDocuments, loading: loadingGet, error: errorGet } = useGetDocuments();
+    const { deleteDocument, loading: loadingDelete, error: errorDelete } = useDeleteDocument();
+
     const handleDocumentChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
         const selectedId = event.target.value;
         if (selectedId) {
@@ -17,9 +18,21 @@ export default function Supprimer() {
     };
     
     const handleDelete = () => {
-        alert(`Suppression de ${selectedDocument!.metadata.name} : ${selectedDocument!.metadata.author}`);
+        deleteDocument(selectedDocument!);
+        console.log("Document supprimé :", selectedDocument);
+        setSelectedDocument(null);
+        refreshDocuments();
     };
 
+    if (errorGet) {
+        return <div>Error: {errorGet}</div>;
+    }
+    if (errorDelete) {
+        return <div>Error: {errorDelete}</div>;
+    }
+    if (loadingGet || loadingDelete) {
+        return <div>Loading...</div>;
+    }   
     return (
         <div>
             <h1>Supprimer</h1>

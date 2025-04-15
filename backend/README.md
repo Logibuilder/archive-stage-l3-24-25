@@ -15,7 +15,11 @@ pip install -r requirements.txt  # installer les dépendances
 
 Lancer le serveur :
 ```bash
-python3 ./src/server.py
+python3 ./src/server.py --graphdb "http://localhost:7200" 
+```
+ou
+```bash
+python3 ./src/server.py --graphdb "http://localhost:7200" --host "localhost" --port 5000
 ```
 
 ## Serveur GraphDB

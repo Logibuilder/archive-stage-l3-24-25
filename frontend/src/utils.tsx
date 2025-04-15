@@ -1,4 +1,6 @@
+import config from "./config";
 import { DHFC_Document } from "./types";
+import { v4 as uuidv4 } from 'uuid';
 
 export function placeholder_entity(doc_num: number, num: number) {
     return {
@@ -9,7 +11,7 @@ export function placeholder_entity(doc_num: number, num: number) {
 
 export function placeholder_document(num: number): DHFC_Document {
     return {
-        id: `${num}`,
+        id: uuidv4(),
         metadata: {
             name: `Document ${num}`,
             author: `Author ${num}`,
@@ -24,19 +26,9 @@ export function placeholder_document(num: number): DHFC_Document {
     };
 }
 
-export function getDocuments(): DHFC_Document[] {
-    // TODO: get documents for user from the server
-    // for now, sample data
-    return [placeholder_document(2), placeholder_document(1)];
-}
-
-function placeholder_id() {
-    return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-}
-
 export function default_document() {
     return {
-        id: placeholder_id(),
+        id: uuidv4(),
         metadata: {
             name: '',
             author: '',
@@ -54,3 +46,12 @@ export function default_entity() {
         data: null
     };
 }
+
+export const fake_data = (() => {
+    const doc1 = placeholder_document(1);
+    const doc2 = placeholder_document(2);
+    return {
+        [doc1.id]: doc1,
+        [doc2.id]: doc2,
+    };
+})();

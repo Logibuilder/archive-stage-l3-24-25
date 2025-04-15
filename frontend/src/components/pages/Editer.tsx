@@ -1,7 +1,7 @@
 import { createContext, useContext, useState } from "react";
 import { DHFC_Document } from "../../types";
 import EditerDoc from "../EditerDoc";
-import { getDocuments } from "../../utils";
+import { useAddDocument, useGetDocuments } from "../../hooks/documents";
 
 const Context = createContext({
     doc: null as DHFC_Document | null,
@@ -11,7 +11,14 @@ const Context = createContext({
 function SelectDoc() {
     const [wantedDoc, setWantedDoc] = useState<DHFC_Document | null>(null);
     const { setDoc } = useContext(Context);
-    const documents = getDocuments();
+    const { documents, loading, error } = useGetDocuments();
+
+    if (error) {
+        return <div>Error: {error}</div>;
+    }
+    if (loading) {
+        return <div>Loading...</div>;
+    }
 
     return (
         <div>
@@ -48,17 +55,20 @@ function SelectDoc() {
 
 function EditDoc() {
     const { doc, setDoc } = useContext(Context);
+    const { addDocument, loading, error } = useAddDocument();
+    if (error) {
+        return <div>Error: {error}</div>;
+    }
+    if (loading) {
+        return <div>Loading...</div>;
+    }
 
-    return <EditerDoc 
-        doc={doc!} 
+    return <EditerDoc
+        doc={doc!}
         onFinish={(doc: DHFC_Document) => {
-            alert(`Document modifié :
-                Nom: ${doc.metadata.name}
-                Auteur: ${doc.metadata.author}
-                Date: ${doc.metadata.date}
-                Entities: ${doc.content.entities.map(entity => entity.type).join(', ')}
-            `);
+            addDocument(doc);
             setDoc(null);
+            console.log("Document modifié :", doc);
         }}
     />;
 }

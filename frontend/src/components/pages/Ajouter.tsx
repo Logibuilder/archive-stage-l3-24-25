@@ -1,17 +1,26 @@
 import { DHFC_Document } from '../../types';
 import { default_document } from '../../utils';
+import { v4 as uuidv4 } from 'uuid';
 import EditerDoc from '../EditerDoc';
+import { useAddDocument } from '../../hooks/documents';
 
-const onFinish = (doc: DHFC_Document) => {
-    alert(`Document ajouté : 
-        Nom: ${doc.metadata.name}
-        Auteur: ${doc.metadata.author}
-        Date: ${doc.metadata.date}
-        Entities: ${doc.content.entities.map(entity => entity.type).join(', ')}
-    `);
-}
 
 export default function Ajouter() {
+    const { addDocument, loading, error} = useAddDocument();
+
+    const onFinish = (doc: DHFC_Document) => {
+        doc.id = uuidv4();
+        console.log("Document ajouté :", doc);
+        addDocument(doc);
+    }
+
+    if (error) {
+        return <div>Error: {error}</div>;
+    }
+    if (loading) {
+        return <div>Loading...</div>;
+    }
+
     return (
         <>
             <h1>Ajouter un document</h1>
