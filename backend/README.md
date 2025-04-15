@@ -17,9 +17,11 @@ Lancer le serveur :
 ```bash
 python3 ./src/server.py --graphdb "http://localhost:7200" 
 ```
-ou
+Il est possible d'utiliser `--fake-api` pour simuler une fausse connexion à GraphDB.
+Ou encore spécifier l'adresse et le port sur lequel tourne le serveur python avec `--host` et `--port`.
+Pour plus d'informations :
 ```bash
-python3 ./src/server.py --graphdb "http://localhost:7200" --host "localhost" --port 5000
+python3 ./src/server.py --help
 ```
 
 ## Serveur GraphDB
