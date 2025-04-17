@@ -1,0 +1,10 @@
+{
+    "ObjectProperty" : "$target$ $property$ $value$",
+    "DataProperty" : "$target$ $property$ \"$value$\"^^<$range$>",
+    "FluentValueProperty" : "$target$ $property$ $version$. $version$ $Temp$ $value$. $version$ $time$  [time:hasBeginning [time:inXSDgYear \"$start$\"^^xsd:gYear]; time:hasEnd [time:inXSDgYear \"$end$\"^^xsd:gYear]]].",
+    "FluentLinkProperty" : "$target$ $property$ $version$. $version$ $Temp$ $value$. $version$ $time$ [time:hasBeginning [time:inXSDgYear \"$start$\"^^xsd:gYear]; time:hasEnd [time:inXSDgYear \"$end$\"^^xsd:gYear]]].",
+    "ReifiedProperty" : "$target$ $property$ $value$. [ a rdf:Statement ; rdf:subject $target$; rdf:property $property$; rdf:object $value^$] $time$ [time:hasBeginning [time:inXSDgYear \"$start$\"^^xsd:gYear]; time:hasEnd [time:inXSDgYear \"$end$\"^^xsd:gYear]].",
+    "NAryProperty" : "$target$ $property$ [$Temp$ $value$ ; $time$ [time:hasBeginning [time:inXSDgYear \"$start$\"^^xsd:gYear]; time:hasEnd [time:inXSDgYear \"$end$\"^^xsd:gYear]]].",
+    "SingletonProperty" : "$target$ $singleton$ $value$. $singleton$ rdfs:subPropertyOf $property$. $singleton$ $time$ [time:hasBeginning [time:inXSDgYear \"$start$\"^^xsd:gYear]; time:hasEnd [time:inXSDgYear \"$end$\"^^xsd:gYear]]." 
+
+}

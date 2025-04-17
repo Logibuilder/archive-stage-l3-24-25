@@ -22,6 +22,15 @@ def toSet(l) :
         s.add(str(e[0]))
     return s
 
+
+def flatten(l) :
+    res=[]
+    for e in l :
+        res.append(e)
+    return res
+
+
+
 #Do a SPARQL update operation
 def updateSPARQL(endpoint, query) :
     sparql = SPARQLWrapper(endpoint)
@@ -37,6 +46,7 @@ def querySPARQL(endpoint, query, wHeader=True) :
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX dhfc: <https://w3id.org/DHFC#>
 PREFIX tsn: <http://purl.org/net/tsn#>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
 """+query
     sparql = SPARQLWrapper(endpoint)
     sparql.setReturnFormat(JSON)
@@ -263,10 +273,208 @@ def pairing(sparqlRepo1, sparqlRepo2) :
         if sparqlRepo1 in dic[e] and sparqlRepo2 in dic[e] :
             pairs.append(dic[e][sparqlRepo1], dic[e][sparqlRepo2])
     return pairs
-            
-file1=generateFiles("http://localhost:3030/NUTS1999/",1,{},{},{}, True, {"compareFun": compareDateTime, "intervalPath" : "(tsn:isMemberOf|tsn:belongsToLevelVersion|tsn:belongsToNomenclatureVersion|tsn:isDivisionOf|tsn:isCoveredBy)*/tsn:referencePeriod",  "endPath" : "<http://www.w3.org/2006/time#hasEnd>/<http://www.w3.org/2006/time#inXSDDateTime>", "startPath" : "<http://www.w3.org/2006/time#hasBeginning>/<http://www.w3.org/2006/time#inXSDDateTime>"} )
-file2=generateFiles("http://localhost:3030/NUTS2003/",2,file1[0],file1[1], file1[2], True,{"compareFun": compareDateTime, "intervalPath" : "(tsn:isMemberOf|tsn:belongsToLevelVersion|tsn:belongsToNomenclatureVersion|tsn:isDivisionOf|tsn:isCoveredBy)*/tsn:referencePeriod",  "endPath" : "<http://www.w3.org/2006/time#hasEnd>/<http://www.w3.org/2006/time#inXSDDateTime>", "startPath" : "<http://www.w3.org/2006/time#hasBeginning>/<http://www.w3.org/2006/time#inXSDDateTime>"}, common=True )
 
+
+#################################### Definite edition ########################################################################
+
+ttlGenerator ={
+    "ObjectProperty" : "$target$ $property$ $value$",
+    "DataProperty" : "$target$ $property$ \"$value$\"^^<$range$>",
+    "FluentValueProperty" : "$target$ $property$ $version$. $version$ $Temp$ $value$. $version$ $time$  [time:hasBeginning [time:inXSDgYear \"$start$\"^^xsd:gYear]; time:hasEnd [time:inXSDgYear \"$end$\"^^xsd:gYear]]].",
+    "FluentLinkProperty" : "$target$ $property$ $version$. $version$ $Temp$ $value$. $version$ $time$ [time:hasBeginning [time:inXSDgYear \"$start$\"^^xsd:gYear]; time:hasEnd [time:inXSDgYear \"$end$\"^^xsd:gYear]]].",
+    "ReifiedProperty" : "$target$ $property$ $value$. [ a rdf:Statement ; rdf:subject $target$; rdf:property $property$; rdf:object $value^$] $time$ [time:hasBeginning [time:inXSDgYear \"$start$\"^^xsd:gYear]; time:hasEnd [time:inXSDgYear \"$end$\"^^xsd:gYear]].",
+    "NAryProperty" : "$target$ $property$ [$Temp$ $value$ ; $time$ [time:hasBeginning [time:inXSDgYear \"$start$\"^^xsd:gYear]; time:hasEnd [time:inXSDgYear \"$end$\"^^xsd:gYear]]].",
+    "SingletonProperty" : "$target$ $singleton$ $value$. $singleton$ rdfs:subPropertyOf $property$. $singleton$ $time$ [time:hasBeginning [time:inXSDgYear \"$start$\"^^xsd:gYear]; time:hasEnd [time:inXSDgYear \"$end$\"^^xsd:gYear]]." 
+
+}
+
+
+def getAvailableClasses(sparqlEndpoint) :
+    query=""" 
+        SELECT ?class WHERE {
+        GRAPH ?g {?class a owl:Class.
+        ?class rdfs:subClassOf* dhfc:Entity.}
+        ?g a dhfc:DomainGraph.
+    }
+"""
+    classes=flatten(toList(querySPARQL(sparqlEndpoint, query)))
+    return classes
+
+
+def vals(dic) :
+    dico={}
+    for e in dic :
+        dico[e]=dic[e]["value"]
+    return dico
+
+#TODO ajouter temporal properties pour Datatypes
+def getProperties(sparqlEndpoint, classIRI) :
+    properties=[]
+    queryObject=""" 
+        SELECT ?property ?inverse ?range ?label WHERE {
+        GRAPH ?g { {?property rdfs:domain/rdfs:subclassOf* <"""+classIRI+""">.} UNION {?property rdfs:domain ?class. <"""+classIRI+"""> rdfs:subclassOf* ?class.}
+        ?property rdfs:range ?range. ?range rdfs:subclassOf* dhfc:Entity. OPTIONAL {?property owl:inverseOf ?inverse}}
+        ?g a dhfc:DomainGraph.
+        ?property rdfs:label ?label.
+    }
+"""
+    objectPs=querySPARQL(sparqlEndpoint, queryObject)
+    for entry in objectPs :
+        res=vals(entry)
+        res["type"]="ObjectProperty"
+        res["temporality"]=False
+        properties.append(res)
+    queryDatatype=""" 
+        SELECT ?property ?range ?label WHERE {
+        GRAPH ?g { ?property a owl:DatatypeProperty. {?property rdfs:domain/rdfs:subclassOf* <"""+classIRI+""">.} UNION {?property rdfs:domain ?class. <"""+classIRI+"""> rdfs:subclassOf* ?class.}
+        ?property rdfs:range ?range}
+        ?g a dhfc:DomainGraph.
+    }
+    """
+    objectPs=querySPARQL(sparqlEndpoint, queryDatatype)
+    for entry in objectPs :
+        res=vals(entry)
+        res["type"]="DataProperty"
+        res["temporality"]=False
+        properties.append(res)
+    
+    queryFluents="""
+        SELECT ?property ?inverse ?Temp ?inverseTemp ?towardSlice ?inverseToward ?hasId ?inverseId ?time ?tempLabel ?tempRange ?rangeToward ?towardLabel WHERE {
+    	?g a dhfc:DomainGraph.
+        GRAPH ?g { 
+        {?property (rdfs:domain/rdfs:subclassOf*) <"""+classIRI+""">.} UNION {?property rdfs:domain ?class. <"""+classIRI+"""> rdfs:subclassOf* ?class.}
+        ?property rdfs:range ?r. ?r rdfs:subclassOf* dhfc:4DFluentsVersion.
+        OPTIONAL {?Temp rdfs:subPropertyOf* dhfc:TimeRelativeValue. {?Temp (rdfs:domain/rdfs:subclassOf*) ?r.} UNION {?Temp rdfs:domain ?class2. ?r rdfs:subclassOf* ?class2.} ?Temp rdfs:label ?tempLabel. ?Temp rdfs:range ?tempRange. OPTIONAL {?Temp owl:inverseOf ?inverseTemp}}
+    	OPTIONAL {?towardSlice rdfs:subPropertyOf* dhfc:relationToVersion. 
+            	{?towardSlice (rdfs:domain/rdfs:subclassOf*) ?r.} UNION {?towardSlice rdfs:domain ?class3. ?r rdfs:subclassOf* ?class3.}
+        		?towardSlice rdfs:range ?sliceType. ?sliceType dhfc:hasIdentityProperty ?hasId.
+                ?hasId rdfs:range ?rangeToward.
+                ?towardSlice rdfs:label ?towardLabel.
+                OPTIONAL {?towardSlice owl:inverseOf ?inverseToward}
+            OPTIONAL {?hasId owl:inverseOf ?inverseId}
+        }
+        OPTIONAL {?property owl:inverseOf ?inverse}
+        ?time rdfs:subPropertyOf dhfc:hasTemporalMarker. {?time (rdfs:domain/rdfs:subclassOf*) ?r.} UNION {?Temp rdfs:domain ?class4. ?r rdfs:subclassOf* ?class4.}    
+    }
+    }
+    """
+    objectPs=querySPARQL(sparqlEndpoint, queryFluents)
+    r={}
+    for entry in objectPs :
+        if "Temp" in entry :
+            cop=dict(entry)
+            for e in cop :
+                if "oward" in e or "Id" in e :
+                    del cop[e]
+            cop["label"]=cop["tempLabel"]
+            del cop["tempLabel"]
+            cop["range"]=cop["tempRange"]
+            del cop["tempRange"]
+            cop["type"]="FluentValueProperty"
+            cop["temporality"]=True
+            r[(entry["property"], entry["Temp"])]=cop
+        if "towardsSlice" in entry :
+            cop=dict(entry)
+            for e in cop :
+                if "Temp" in e or "temp" in e :
+                    del cop[e]
+            cop["label"]=cop["towardLabel"]
+            del cop["towardLabel"]
+            cop["range"]=cop["rangeToward"]
+            del cop["rangeToward"]
+            cop["type"]="FluentLinkProperty"
+            cop["temporality"]=True
+            r[(entry["property"], entry["towardsSlice"])]=cop
+    for entry in r :
+        properties.append(r[entry])
+
+
+    queryReif="""SELECT ?property ?inverse ?time ?label ?range WHERE {
+    	?g a dhfc:DomainGraph.
+        GRAPH ?g { 
+        ?property rdfs:subPropertyOf* dhfc:ReifiedTemporalProperty. 
+        ?property rdfs:label ?label.
+        ?property rdfs:range ?range.
+        {?property (rdfs:domain/rdfs:subclassOf*) <"""+classIRI+""">.} UNION {?property rdfs:domain ?class. <"""+classIRI+"""> rdfs:subclassOf* ?class.}
+         ?property dhfc:usesTemporalMarker ?time.
+         OPTIONAL {?property owl:inverseOf ?inverse}
+    }
+    }"""
+
+    objectPs=querySPARQL(sparqlEndpoint, queryReif)
+    for entry in objectPs :
+        res=vals(entry)
+        res["type"]="ReifiedProperty"
+        res["temporality"]=True
+        properties.append(res)
+
+    queryNAry="""
+SELECT ?property ?inverse ?Temp ?inverseTemp ?time ?label ?range WHERE {
+    	?g a dhfc:DomainGraph.
+        GRAPH ?g { 
+        {?property (rdfs:domain/rdfs:subclassOf*) <"""+classIRI+""">.} UNION {?property rdfs:domain ?class. <"""+classIRI+"""> rdfs:subclassOf* ?class.}
+        ?property rdfs:range ?r. ?r rdfs:subclassOf* dhfc:TemporalNAryProperty.
+        ?Temp rdfs:subPropertyOf dhfc:TimeRelativeValue. {?Temp (rdfs:domain/rdfs:subclassOf*) ?r.} UNION {?Temp rdfs:domain ?class2. ?r rdfs:subclassOf* ?class2.} ?Temp rdfs:label ?label. ?Temp rdfs:range ?range.
+        OPTIONAL {?property owl:inverseOf ?inverse}
+        OPTIONAL {?Temp owl:inverseOf ?inverseTemp}
+       	?time rdfs:subPropertyOf dhfc:hasTemporalMarker. {?time (rdfs:domain/rdfs:subclassOf*) ?r.} UNION {?Temp rdfs:domain ?class4. ?r rdfs:subclassOf* ?class4.}
+    
+    }
+    }
+"""
+    objectPs=querySPARQL(sparqlEndpoint, queryNAry)
+    for entry in objectPs :
+        res=vals(entry)
+        res["type"]="NAryProperty"
+        res["temporality"]=True
+        properties.append(res)
+
+    querySingleton="""
+        SELECT ?property ?inverse ?time ?label ?range WHERE {
+    	    ?g a dhfc:DomainGraph.
+        GRAPH ?g { 
+            ?property rdfs:subPropertyOf* dhfc:SingletonTemporalProperty. 
+            {?property (rdfs:domain/rdfs:subclassOf*) <"""+classIRI+""">.} UNION {?property rdfs:domain ?class. <"""+classIRI+"""> rdfs:subclassOf* ?class.}
+            ?property rdfs:range ?range. ?property rdfs:label ?label.
+        ?property dhfc:usesTemporalMarker ?time.
+        OPTIONAL {?property owl:inverseOf ?inverse} 
+    }
+    }
+"""
+    objectPs=querySPARQL(sparqlEndpoint, querySingleton)
+    for entry in objectPs :
+        res=vals(entry)
+        res["type"]="SingletonProperty"
+        res["temporality"]=True
+        properties.append(res)
+    return properties
+
+def mapOntology(sparqlEndpoint) :
+    availableClasses=getAvailableClasses(sparqlEndpoint)
+    result={}
+    for cl in availableClasses :
+        result[cl]=getProperties(sparqlEndpoint, cl)
+    return result
+
+def generate(content, documentBaseIRI) :
+    result=""
+    for entry in  content :
+        base=ttlGenerator[entry[1]["type"]]
+        for key in entry[1] :
+            base.replace("$"+key+"$", "<"+entry[1][key]+">")
+        target=documentBaseIRI+"#"+entry[0]
+        base.replace("$target$", "<"+target+">")
+        value=documentBaseIRI+"#"+entry[2]
+        base.replace("$value$", "<"+value+">")
+        if entry[1]["temporality"] :
+            base.replace("$start$", str(entry[4][0]))
+            base.replace("$end$", str(entry[4][1]))
+        if entry[1]["type"]=="FluentValueProperty" or entry[1]["type"]=="FluentLinkProperty" :
+            base.replace("$version$", target+"__"+str(entry[4][0])+"_"+str(entry[4][1]))
+        if entry[1]["type"]=="SingeltonProperty" :
+            base.replace("$singleton$", entry[1]["property"]+"__"+str(entry[0])+"_"+str(entry[2][1]))
+        result+=base
+    return result
 
 
 
