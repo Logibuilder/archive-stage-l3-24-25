@@ -300,6 +300,26 @@ def getAvailableClasses(sparqlEndpoint) :
     classes=flatten(toList(querySPARQL(sparqlEndpoint, query)))
     return classes
 
+#TODO reverse fluent
+def reverse(prop) :
+    proper=dict(prop)
+    if proper["type"] not in ("DataProperty", "FluentLinkProperty", "FluentValueProperty", "NAryProperty") :
+        if "inverse" in proper :
+            inverse=proper["inverse"]
+            proper["inverse"]=proper["property"]
+            proper["property"]=inverse
+            return proper
+    elif proper["type"]=="NAryProperty" :
+        if "inverse" in proper and "inverseTemp" in proper :
+            inverse=proper["inverse"]
+            proper["inverse"]=proper["Temp"]
+            proper["Temp"]=inverse
+            inverse=proper["inverseTemp"]
+            proper["inverseTemp"]=proper["property"]
+            proper["property"]=inverse
+            return proper
+    return None
+    
 
 def vals(dic) :
     dico={}
@@ -458,26 +478,38 @@ def mapOntology(sparqlEndpoint) :
 
 def generate(content, documentBaseIRI) :
     result=""
-    for entry in  content :
-        base=ttlGenerator[entry[1]["type"]]
-        for key in entry[1] :
-            base.replace("$"+key+"$", "<"+entry[1][key]+">")
-        target=documentBaseIRI+"#"+entry[0]
-        base.replace("$target$", "<"+target+">")
-        value=documentBaseIRI+"#"+entry[2]
-        base.replace("$value$", "<"+value+">")
-        if entry[1]["temporality"] :
-            base.replace("$start$", str(entry[4][0]))
-            base.replace("$end$", str(entry[4][1]))
-        if entry[1]["type"]=="FluentValueProperty" or entry[1]["type"]=="FluentLinkProperty" :
-            base.replace("$version$", target+"__"+str(entry[4][0])+"_"+str(entry[4][1]))
-        if entry[1]["type"]=="SingeltonProperty" :
-            base.replace("$singleton$", entry[1]["property"]+"__"+str(entry[0])+"_"+str(entry[2][1]))
-        result+=base
+    for key in content :
+        IRI=documentBaseIRI+"#"+key
+        result+=IRI+" a <"+content[key]["class"]+">.\n"
+        for entry in  content[key]["assertions"] :
+            base=ttlGenerator[entry[1]["type"]]
+            for key in entry[1] :
+                base.replace("$"+key+"$", "<"+entry[1][key]+">")
+            target=documentBaseIRI+"#"+entry[0]
+            base.replace("$target$", "<"+target+">")
+            value=documentBaseIRI+"#"+entry[2]
+            base.replace("$value$", "<"+value+">")
+            if entry[1]["temporality"] :
+                base.replace("$start$", str(entry[4][0]))
+                base.replace("$end$", str(entry[4][1]))
+            if entry[1]["type"]=="FluentValueProperty" or entry[1]["type"]=="FluentLinkProperty" :
+                base.replace("$version$", target+"__"+str(entry[4][0])+"_"+str(entry[4][1]))
+            if entry[1]["type"]=="SingeltonProperty" :
+                base.replace("$singleton$", entry[1]["property"]+"__"+str(entry[0])+"_"+str(entry[2][1]))
+            result+=base + "\n"
     return result
 
-
-
+def updateDoc(entityContent, documentContents) :
+    documentContents[entityContent[0]]=entityContent[1]
+    for prop in documentContents[entityContent[0]]["assertions"] :
+        if "Data" not in prop[1]["type"] :
+            if prop[2] not in documentContents :
+                documentContents[prop[2]]={"class" : prop[2]["type"], "assertions" : [] }
+            if reverse(prop[1])!=None :
+                documentContents[prop[2]]["assertions"].append((prop[2],reverse(prop[1]), prop[1] ))
+    return documentContents
+                
+            
 
 
     
