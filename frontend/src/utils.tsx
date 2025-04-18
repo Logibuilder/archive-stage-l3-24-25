@@ -45,12 +45,3 @@ export function default_entity() {
         data: null
     };
 }
-
-export const fake_data = (() => {
-    const doc1 = placeholder_document(1);
-    const doc2 = placeholder_document(2);
-    return {
-        [doc1.id]: doc1,
-        [doc2.id]: doc2,
-    };
-})();

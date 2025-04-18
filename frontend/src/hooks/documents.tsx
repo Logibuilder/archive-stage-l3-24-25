@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { DHFC_Document } from "../types";
 import config from "../config";
-import { fake_data } from "../utils";
 
 export function useGetDocuments() {
     const [documents, setDocuments] = useState<Record<string, DHFC_Document>>({});
@@ -16,15 +15,13 @@ export function useGetDocuments() {
     useEffect(() => {
         (async () => {
             try {
-                if (config.FAKE_DATA) {
-                    setDocuments(fake_data);
-                } else {
-                    const response = await fetch(`${config.API_URL}/documents`);
-                    if (!response.ok) {
-                        throw new Error("Erreur lors de la récupération des documents");
-                    }
-                    setDocuments(await response.json());
+
+                const response = await fetch(`${config.API_URL}/documents`);
+                if (!response.ok) {
+                    throw new Error("Erreur lors de la récupération des documents");
                 }
+                setDocuments(await response.json());
+
             } catch (err) {
                 setError(err as string);
             } finally {
@@ -42,21 +39,19 @@ export function useAddDocument() {
 
     const addDocument = useCallback(async (document: DHFC_Document) => {
         try {
-            if (config.FAKE_DATA) {
-                fake_data[document.id] = document;
-            } else {
-                const response = await fetch(`${config.API_URL}/documents`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(document),
-                });
 
-                if (!response.ok) {
-                    throw new Error("Erreur lors de l'ajout du document");
-                }
+            const response = await fetch(`${config.API_URL}/documents`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(document),
+            });
+
+            if (!response.ok) {
+                throw new Error("Erreur lors de l'ajout du document");
             }
+
         } catch (err) {
             setError(err as string);
         } finally {
@@ -73,17 +68,14 @@ export function useDeleteDocument() {
 
     const deleteDocument = useCallback(async (doc: DHFC_Document) => {
         try {
-            if (config.FAKE_DATA) {
-                delete fake_data[doc.id];
-            } else {
-                const response = await fetch(`${config.API_URL}/documents/${doc.id}`, {
-                    method: 'DELETE',
-                });
+            const response = await fetch(`${config.API_URL}/documents/${doc.id}`, {
+                method: 'DELETE',
+            });
 
-                if (!response.ok) {
-                    throw new Error("Erreur lors de la suppression du document");
-                }
+            if (!response.ok) {
+                throw new Error("Erreur lors de la suppression du document");
             }
+
         } catch (err) {
             setError(err as string);
         } finally {
