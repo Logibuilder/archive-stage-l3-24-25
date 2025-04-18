@@ -26,7 +26,7 @@ def toSet(l) :
 def flatten(l) :
     res=[]
     for e in l :
-        res.append(e)
+        res+=e
     return res
 
 
@@ -434,7 +434,7 @@ SELECT ?property ?inverse ?Temp ?inverseTemp ?time ?label ?range WHERE {
         GRAPH ?g { 
         {?property (rdfs:domain/rdfs:subclassOf*) <"""+classIRI+""">.} UNION {?property rdfs:domain ?class. <"""+classIRI+"""> rdfs:subclassOf* ?class.}
         ?property rdfs:range ?r. ?r rdfs:subclassOf* dhfc:TemporalNAryProperty.
-        ?Temp rdfs:subPropertyOf dhfc:TimeRelativeValue. {?Temp (rdfs:domain/rdfs:subclassOf*) ?r.} UNION {?Temp rdfs:domain ?class2. ?r rdfs:subclassOf* ?class2.} ?Temp rdfs:label ?label. ?Temp rdfs:range ?range.
+        ?Temp rdfs:subPropertyOf* dhfc:TimeRelativeValue. {?Temp (rdfs:domain/rdfs:subclassOf*) ?r.} UNION {?Temp rdfs:domain ?class2. ?r rdfs:subclassOf* ?class2.} ?Temp rdfs:label ?label. ?Temp rdfs:range ?range.
         OPTIONAL {?property owl:inverseOf ?inverse}
         OPTIONAL {?Temp owl:inverseOf ?inverseTemp}
        	?time rdfs:subPropertyOf dhfc:hasTemporalMarker. {?time (rdfs:domain/rdfs:subclassOf*) ?r.} UNION {?Temp rdfs:domain ?class4. ?r rdfs:subclassOf* ?class4.}
@@ -471,6 +471,7 @@ SELECT ?property ?inverse ?Temp ?inverseTemp ?time ?label ?range WHERE {
 
 def mapOntology(sparqlEndpoint) :
     availableClasses=getAvailableClasses(sparqlEndpoint)
+    print(availableClasses)
     result={}
     for cl in availableClasses :
         result[cl]=getProperties(sparqlEndpoint, cl)
