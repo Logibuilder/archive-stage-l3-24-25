@@ -5,8 +5,9 @@ import './index.css'
 import Header from './components/Header'
 import Ajouter from './components/pages/Ajouter'
 import Accueil from './components/pages/Accueil'
-import Supprimer from './components/pages/Supprimer'
 import Editer from './components/pages/Editer'
+import { Dashboard } from './components/pages/Dashboard'
+import { Voir } from './components/pages/Voir'
 
 function App() {
   return (
@@ -16,8 +17,9 @@ function App() {
         <Routes>
           <Route path="/" element={<Accueil />} />
           <Route path="/ajouter" element={<Ajouter />} />
-          <Route path="/supprimer" element={<Supprimer />} />
           <Route path="/editer" element={<Editer />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/voir" element={<Voir />} />
         </Routes>
       </main>
     </BrowserRouter>
