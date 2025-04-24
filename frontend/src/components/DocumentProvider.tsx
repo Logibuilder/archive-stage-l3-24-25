@@ -1,17 +1,24 @@
-import { useCallback, useEffect, useState } from "react";
-import { DHFC_Document } from "../types";
-import config from "../config";
+import { createContext, useCallback, useContext, useState, ReactNode, useEffect } from 'react';
+import { DHFC_Document } from '../types';
+import config from '../config';
 
-export function useGetDocuments() {
+// Create the context with a default value
+interface DocumentContextType {
+    documents: Record<string, DHFC_Document>;
+    loading: boolean;
+    error: string | null;
+    addDocument: (document: DHFC_Document) => Promise<void>;
+    deleteDocument: (document: DHFC_Document) => Promise<void>;
+}
+
+const DocumentContext = createContext<DocumentContextType | undefined>(undefined);
+
+export function DocumentProvider({ children }: { children: ReactNode }) {
     const [documents, setDocuments] = useState<Record<string, DHFC_Document>>({});
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [refresh, setRefresh] = useState(false);
 
-    const refreshDocuments = useCallback(() => {
-        setRefresh(prev => !prev);
-    }, []);
-
+    // get documents
     useEffect(() => {
         (async () => {
             try {
@@ -28,14 +35,7 @@ export function useGetDocuments() {
                 setLoading(false);
             }
         })();
-    }, [refresh]);
-
-    return { documents, refreshDocuments, loading, error };
-}
-
-export function useAddDocument() {
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
+    }, []);
 
     const addDocument = useCallback(async (document: DHFC_Document) => {
         try {
@@ -52,19 +52,16 @@ export function useAddDocument() {
                 throw new Error("Erreur lors de l'ajout du document");
             }
 
+            setDocuments(prev => ({
+                ...prev,
+                [document.id]: document
+            }));
         } catch (err) {
             setError(err as string);
         } finally {
             setLoading(false);
         }
     }, []);
-
-    return { addDocument, loading, error };
-}
-
-export function useDeleteDocument() {
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
 
     const deleteDocument = useCallback(async (doc: DHFC_Document) => {
         try {
@@ -76,11 +73,38 @@ export function useDeleteDocument() {
                 throw new Error("Erreur lors de la suppression du document");
             }
 
+            setDocuments(prev => {
+                const newDocuments = { ...prev };
+                delete newDocuments[doc.id];
+                return newDocuments;
+            });
         } catch (err) {
             setError(err as string);
         } finally {
             setLoading(false);
         }
     }, []);
-    return { deleteDocument, loading, error };
+
+    const value = {
+        documents,
+        loading,
+        error,
+        addDocument,
+        deleteDocument
+    };
+
+    return (
+        <DocumentContext.Provider value={value}>
+            {children}
+        </DocumentContext.Provider>
+    );
+}
+
+// Custom hook to use the document context
+export function useDocumentContext() {
+    const context = useContext(DocumentContext);
+    if (context === undefined) {
+        throw new Error('useDocumentContext must be used within a DocumentProvider');
+    }
+    return context;
 }

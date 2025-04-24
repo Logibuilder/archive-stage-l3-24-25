@@ -8,21 +8,24 @@ import Accueil from './components/pages/Accueil'
 import Editer from './components/pages/Editer'
 import { Dashboard } from './components/pages/Dashboard'
 import { Voir } from './components/pages/Voir'
+import { DocumentProvider } from './components/DocumentProvider'
 
 function App() {
   return (
-    <BrowserRouter>
-      <Header />
-      <main style={{ padding: '1rem' }}>
-        <Routes>
-          <Route path="/" element={<Accueil />} />
-          <Route path="/ajouter" element={<Ajouter />} />
-          <Route path="/editer" element={<Editer />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/voir" element={<Voir />} />
-        </Routes>
-      </main>
-    </BrowserRouter>
+    <DocumentProvider>
+      <BrowserRouter>
+        <Header />
+        <main style={{ padding: '1rem' }}>
+          <Routes>
+            <Route path="/" element={<Accueil />} />
+            <Route path="/ajouter" element={<Ajouter />} />
+            <Route path="/editer" element={<Editer />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/voir" element={<Voir />} />
+          </Routes>
+        </main>
+      </BrowserRouter>
+    </DocumentProvider>
   )
 }
 

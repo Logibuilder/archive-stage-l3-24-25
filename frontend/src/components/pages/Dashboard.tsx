@@ -1,12 +1,11 @@
 import { useNavigate } from "react-router-dom";
-import { useDeleteDocument, useGetDocuments } from "../../hooks/documents";
 import { DHFC_Document } from "../../types";
 import { confirmPopup } from "../../utils";
+import { useDocumentContext } from "../DocumentProvider";
 
 export function Dashboard() {
-    const { documents, refreshDocuments, loading: loadingGet, error: errorGet } = useGetDocuments();
-    const { deleteDocument, loading: loadingDelete, error: errorDelete } = useDeleteDocument();
     const navigate = useNavigate();
+    const { documents, deleteDocument, loading, error } = useDocumentContext();
 
     const handleDelete = (doc: DHFC_Document) => () => {
         confirmPopup(
@@ -14,7 +13,6 @@ export function Dashboard() {
             () => {
                 deleteDocument(doc);
                 console.log("Document supprimé :", doc);
-                refreshDocuments();
             }
         );
     }
@@ -30,10 +28,10 @@ export function Dashboard() {
         );
     }
 
-    if (errorGet || errorDelete) {
-        return <div>Error: {errorGet?.toString() || errorDelete?.toString()}</div>;
+    if (error) {
+        return <div>Error: {error}</div>;
     }
-    if (loadingGet || loadingDelete) {
+    if (loading) {
         return <div>Loading...</div>;
     }
 
