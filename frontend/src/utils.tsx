@@ -46,11 +46,44 @@ export function default_entity() {
     };
 }
 
-export const fake_data = (() => {
-    const doc1 = placeholder_document(1);
-    const doc2 = placeholder_document(2);
-    return {
-        [doc1.id]: doc1,
-        [doc2.id]: doc2,
-    };
-})();
+export function print_doc(doc: DHFC_Document) {
+    const metadata = (
+        <div>
+            <p>Name: {doc.metadata.name}</p>
+            <p>Author: {doc.metadata.author}</p>
+            <p>Date: {doc.metadata.date?.toString()}</p>
+        </div>
+    )
+
+    const entities = doc.content.entities.map((entity, index) => print_entity(entity, index));
+
+    return (
+        <div>
+            {metadata}
+            <h2>Entities:</h2>
+            <div className="entities-list">
+                {entities}
+            </div>
+        </div>
+    );
+}
+
+export function print_entity(entity: any, index: number) {
+    return (
+        <div key={index}>
+            <p>Type: {entity.type}</p>
+            <p>Data: {entity.data}</p>
+        </div>
+    );
+}
+
+export function confirmPopup(
+    message: string = "Êtes-vous sûr de vouloir continuer ?",
+    actionCallback: () => void,
+): void {
+    const isConfirmed = window.confirm(message);
+
+    if (isConfirmed) {
+        actionCallback();
+    }
+}

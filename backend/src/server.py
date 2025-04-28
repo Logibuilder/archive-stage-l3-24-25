@@ -2,6 +2,7 @@ from typing import Any, Dict
 from flask import Flask, json, request, jsonify
 from flask_cors import CORS
 import argparse
+import os
 
 app = Flask(__name__)
 CORS(app)
@@ -47,6 +48,19 @@ def delete_document(doc_id):
     else:
         return jsonify({"error": "Document not found"}), 404
 
+    
+### Utils
+
+def init_storage():
+    """Initialize storage directory"""
+    if not os.path.exists(storage_dir):
+        log(f"Creating storage directory at {storage_dir}")
+        os.makedirs(storage_dir)
+    elif not os.path.exists(storage_dir + "/documents.json"):
+            log(f"Creating documents.json in {storage_dir}")
+            with open(storage_dir + "/documents.json", 'w') as f:
+                json.dump({}, f)
+
 ### The rest
 
 def log(message: str):
@@ -64,6 +78,7 @@ def parse_arguments():
     parser = argparse.ArgumentParser(description='Run the document API server')
     parser.add_argument('--host', default='0.0.0.0', help='Host to bind the server to')
     parser.add_argument('--port', type=int, default=5000, help='Port to bind the server to')
+    parser.add_argument('--storage', default='./storage', help='Path to the directory that will store data')
     parser.add_argument('--graph-db', help='Graph DB server in format "address:port"')
     parser.add_argument('--fake-api', default=False, action='store_true', help='Use fake API for testing')
     parser.add_argument('-v', '--verbose', default=False, action='store_true', help='Enable verbose logging')
@@ -71,7 +86,9 @@ def parse_arguments():
     
     # Parse the graph DB server address and port
     if args.fake_api and args.graph_db:
-        parser.error("--fake_api and --graph-db are mutually exclusive")
+        parser.error("--fake_api and --graph-db are mutually exclusive. \nUse -h for more info.")
+    if not args.fake_api and not args.graph_db:
+        parser.error("Either --fake_api or --graph-db must be specified. \nUse -h for more info.")
     if args.graph_db:
         try:
             global graph_db_address, graph_db_port
@@ -85,8 +102,9 @@ def parse_arguments():
         global fake_api, documents
         documents = {}
         fake_api = args.fake_api
-    global verbose
+    global verbose, storage_dir
     verbose = args.verbose
+    storage_dir = args.storage
 
     return args
 

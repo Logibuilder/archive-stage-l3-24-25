@@ -277,6 +277,7 @@ def pairing(sparqlRepo1, sparqlRepo2) :
 
 #################################### Definite edition ########################################################################
 
+#TODO : charger le json
 ttlGenerator ={
     "ObjectProperty" : "$target$ $property$ $value$",
     "DataProperty" : "$target$ $property$ \"$value$\"^^<$range$>",
@@ -290,6 +291,7 @@ ttlGenerator ={
 
 
 def getAvailableClasses(sparqlEndpoint) :
+    """Classes que l'utilisateur peut utiliser pour créer des entités"""
     query=""" 
         SELECT ?class WHERE {
         GRAPH ?g {?class a owl:Class.
@@ -301,7 +303,8 @@ def getAvailableClasses(sparqlEndpoint) :
     return classes
 
 #TODO reverse fluent
-def reverse(prop) :
+def reverse(prop):
+    """Renvoie la prop inverse, None sinon"""
     proper=dict(prop)
     if proper["type"] not in ("DataProperty", "FluentLinkProperty", "FluentValueProperty", "NAryProperty") :
         if "inverse" in proper :
@@ -329,6 +332,7 @@ def vals(dic) :
 
 #TODO ajouter temporal properties pour Datatypes
 def getProperties(sparqlEndpoint, classIRI) :
+    """Renvoie toutes les propriétés de la classe"""
     properties=[]
     queryObject=""" 
         SELECT ?property ?inverse ?range ?label WHERE {
@@ -470,6 +474,7 @@ SELECT ?property ?inverse ?Temp ?inverseTemp ?time ?label ?range WHERE {
     return properties
 
 def mapOntology(sparqlEndpoint) :
+    """Renvoie toutes les classes et leurs propriétés"""
     availableClasses=getAvailableClasses(sparqlEndpoint)
     print(availableClasses)
     result={}
@@ -478,6 +483,10 @@ def mapOntology(sparqlEndpoint) :
     return result
 
 def generate(content, documentBaseIRI) :
+    """paramètres :
+    content : dictionnaire de la forme {nom_entité: {class: classe, assertions: [triplets/quadruplets]}}
+    documentBaseIRI : https://example.org/uuid_doc
+    """
     result=""
     for key in content :
         IRI=documentBaseIRI+"#"+key
@@ -509,10 +518,3 @@ def updateDoc(entityContent, documentContents) :
             if reverse(prop[1])!=None :
                 documentContents[prop[2]]["assertions"].append((prop[2],reverse(prop[1]), prop[1] ))
     return documentContents
-                
-            
-
-
-    
-
-

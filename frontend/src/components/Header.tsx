@@ -41,9 +41,7 @@ export default function Header(): React.ReactElement {
                 {buttonNavigation('Interface DHFC', '/')}
             </div>
             <div>
-                {buttonNavigation('Ajouter', '/ajouter')}
-                {buttonNavigation('Supprimer', '/supprimer')}
-                {buttonNavigation('Éditer', '/editer')}
+                {buttonNavigation('Dashboard', '/dashboard')}
             </div>
         </header>
     );
