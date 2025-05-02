@@ -4,7 +4,6 @@
 
 `src/config.ts` :
 - `API_URL`: l'URL de l'API (backend)
-- `FAKE_DATA`: si `true`, des données factices sont utilisées au lieu de l'API
 
 ## Run
 
