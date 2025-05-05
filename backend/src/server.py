@@ -15,7 +15,8 @@ domain_ontology = {}
 def get_documents():
     """Return all documents as JSON"""        
     log("Fetching documents")
-    documents = getDocuments()
+    #documents = getDocuments()
+    documents = {}
     log_json(documents)
     return jsonify(documents)
 
@@ -52,6 +53,13 @@ def get_ontology():
     
 ### Le reste
 
+def property_uri_to_dic(property_uri: str, type_uri: str) -> Dict[str, str]:
+    """Convert a property URI to a dictionary with 'property' and 'type' keys"""
+    properties = domain_ontology[type_uri]
+    for prop in properties:
+        if prop["property"] == property_uri:
+            return prop
+    raise ValueError(f"Property {property_uri} not found in type {type_uri}")
 
 def log(message: str):
     """Log a message if verbose mode is enabled"""
