@@ -1,6 +1,6 @@
 import { DHFC_Document } from '../../types';
 import { useDocumentContext } from '../DocumentProvider';
-import EditerDoc from '../EditerDoc';
+import EditerDoc from '../forms/EditerDoc';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 export default function Editer() {

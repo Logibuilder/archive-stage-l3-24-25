@@ -1,31 +1,7 @@
-import { DHFC_Document } from "./types";
+import { DHFC_Document, DHFC_Entity } from "./types";
 import { v4 as uuidv4 } from 'uuid';
 
-export function placeholder_entity(doc_num: number, num: number) {
-    return {
-        type: `Entity ${doc_num}-${num}`,
-        data: `Data ${doc_num}-${num}`
-    };
-}
-
-export function placeholder_document(num: number): DHFC_Document {
-    return {
-        id: uuidv4(),
-        metadata: {
-            name: `Document ${num}`,
-            author: `Author ${num}`,
-            date: new Date()
-        },
-        content: {
-            entities: [
-                placeholder_entity(num, 1),
-                placeholder_entity(num, 2),
-            ]
-        }
-    };
-}
-
-export function default_document() {
+export function default_document(): DHFC_Document {
     return {
         id: uuidv4(),
         metadata: {
@@ -33,16 +9,15 @@ export function default_document() {
             author: '',
             date: null
         },
-        content: {
-            entities: []
-        }
+        entities: []
     };
 }
 
-export function default_entity() {
+export function default_entity(): DHFC_Entity {
     return {
-        type: '',
-        data: null
+        type_uri: '',
+        name: '',
+        assertions: []
     };
 }
 
@@ -55,7 +30,7 @@ export function print_doc(doc: DHFC_Document) {
         </div>
     )
 
-    const entities = doc.content.entities.map((entity, index) => print_entity(entity, index));
+    const entities = doc.entities.map((entity, index) => print_entity(entity, index));
 
     return (
         <div>

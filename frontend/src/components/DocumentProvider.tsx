@@ -4,9 +4,10 @@ import config from '../config';
 
 // Create the context with a default value
 interface DocumentContextType {
-    documents: Record<string, DHFC_Document>;
+    domain_ontology: Record<string, any>;
     loading: boolean;
     error: string | null;
+    getDocuments: () => Promise<Record<string, DHFC_Document>>;
     addDocument: (document: DHFC_Document) => Promise<void>;
     deleteDocument: (document: DHFC_Document) => Promise<void>;
 }
@@ -15,8 +16,27 @@ const DocumentContext = createContext<DocumentContextType | undefined>(undefined
 
 export function DocumentProvider({ children }: { children: ReactNode }) {
     const [documents, setDocuments] = useState<Record<string, DHFC_Document>>({});
+    const [domain_ontology, setDomainOntology] = useState<Record<string, any>>({});
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [refresh, setRefresh] = useState(false);
+
+    // get domain ontology
+    useEffect(() => {
+        (async () => {
+            try {
+                const response = await fetch(`${config.API_URL}/domain_ontology`);
+                if (!response.ok) {
+                    throw new Error("Erreur lors de la récupération de l'ontologie de domaine");
+                }
+                setDomainOntology(await response.json());
+            } catch (err) {
+                setError(err instanceof Error ? err.message : String(err));
+            } finally {
+                setLoading(false);
+            }
+        })();
+    }, []);
 
     // get documents
     useEffect(() => {
@@ -28,14 +48,22 @@ export function DocumentProvider({ children }: { children: ReactNode }) {
                     throw new Error("Erreur lors de la récupération des documents");
                 }
                 setDocuments(await response.json());
-
             } catch (err) {
-                setError(err as string);
+                setError(err instanceof Error ? err.message : String(err));
             } finally {
                 setLoading(false);
             }
         })();
-    }, []);
+    }, [refresh]);
+
+    const refreshDocuments = () => {
+        setRefresh(prev => !prev);
+    }
+
+    const getDocuments = useCallback(async () => {
+        refreshDocuments();
+        return documents;
+    }, [documents]);
 
     const addDocument = useCallback(async (document: DHFC_Document) => {
         try {
@@ -52,12 +80,9 @@ export function DocumentProvider({ children }: { children: ReactNode }) {
                 throw new Error("Erreur lors de l'ajout du document");
             }
 
-            setDocuments(prev => ({
-                ...prev,
-                [document.id]: document
-            }));
+            refreshDocuments();
         } catch (err) {
-            setError(err as string);
+            setError(err instanceof Error ? err.message : String(err));
         } finally {
             setLoading(false);
         }
@@ -73,22 +98,19 @@ export function DocumentProvider({ children }: { children: ReactNode }) {
                 throw new Error("Erreur lors de la suppression du document");
             }
 
-            setDocuments(prev => {
-                const newDocuments = { ...prev };
-                delete newDocuments[doc.id];
-                return newDocuments;
-            });
+            refreshDocuments();
         } catch (err) {
-            setError(err as string);
+            setError(err instanceof Error ? err.message : String(err));
         } finally {
             setLoading(false);
         }
     }, []);
 
     const value = {
-        documents,
+        domain_ontology,
         loading,
         error,
+        getDocuments,
         addDocument,
         deleteDocument
     };

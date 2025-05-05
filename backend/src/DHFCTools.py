@@ -486,6 +486,7 @@ def generate(content, documentBaseIRI) :
     """paramètres :
     content : dictionnaire de la forme {nom_entité: {class: classe, assertions: [triplets/quadruplets]}}
     documentBaseIRI : https://example.org/uuid_doc
+    result : les triplets rdf des entités dans un graphe de nom documentBaseIRI
     """
     result=""
     for key in content :

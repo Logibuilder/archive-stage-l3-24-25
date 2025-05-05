@@ -1,44 +1,40 @@
 import { useState } from 'react';
-import { DHFC_Document } from '../types';
-import { default_document, default_entity } from '../utils';
+import { DHFC_Document, DHFC_Entity } from '../../types';
+import { default_document, default_entity } from '../../utils';
+import EditEntity, { isEntityValid } from './EditEntity';
 
-
-export default function EditerDoc({doc, onFinish}: {doc: DHFC_Document, onFinish: (doc: DHFC_Document) => void}) {
+export default function EditerDoc({ doc, onFinish }: { doc: DHFC_Document, onFinish: (doc: DHFC_Document) => void }) {
     const [activeTab, setActiveTab] = useState<'metadata' | 'content'>('metadata');
     const [documentData, setDocumentData] = useState<DHFC_Document>(doc);
 
     // Handle input changes
-    const handleInputChange = (tab: 'metadata' | 'content', field: string, value: string) => {
+    const handleMetadataInputChange = (field: string, value: string) => {
         setDocumentData(prev => ({
             ...prev,
-            [tab]: {
-                ...prev[tab],
+            metadata: {
+                ...prev.metadata,
                 [field]: value
             }
         }));
     };
 
-    // Check if all fields are filled
     const isFormComplete = () => {
-        const { metadata, content } = documentData;
+        const { metadata, entities } = documentData;
         return (
             metadata.name.trim() !== '' &&
             metadata.author.trim() !== '' &&
             metadata.date !== null &&
-            content.entities.length > 0 &&
-            content.entities.every(entity => entity.type.trim() !== '' && entity.data !== null && entity.data.trim() !== '')
+            entities.length > 0 &&
+            entities.every(entity => isEntityValid(entity))
         );
     };
 
-    const handleEntityInputChange = (idx: number, field: string, value: string) => {
+    const handleEntityInputChange = (idx: number) => (entity: DHFC_Entity) => {
         setDocumentData(prev => ({
             ...prev,
-            content: {
-                ...prev.content,
-                entities: prev.content.entities.map((entity, index) =>
-                    index === idx ? { ...entity, [field]: value } : entity
-                )
-            }
+            entities: prev.entities.map((e, index) =>
+                index === idx ? entity : e
+            )
         }));
     }
 
@@ -51,42 +47,20 @@ export default function EditerDoc({doc, onFinish}: {doc: DHFC_Document, onFinish
         setActiveTab('metadata');
     };
 
-    const entityForm = (entity_idx: number) => {
-        const entity = documentData.content.entities[entity_idx]
-        return (
-            <div>
-                <div>
-                    <label htmlFor="type">Type :</label>
-                    <input
-                        id="type"
-                        type="text"
-                        value={entity.type}
-                        onChange={(e) => handleEntityInputChange(entity_idx, 'type', e.target.value)}
-                    />
-                </div>
-
-                <div>
-                    <label htmlFor="data">Données :</label>
-                    <input
-                        id="data"
-                        type="text"
-                        value={entity.data || ''}
-                        onChange={(e) => handleEntityInputChange(entity_idx, 'data', e.target.value)}
-                    />
-                </div>
-            </div>
-        )
-    }
-
     const addEntity = () => {
         setDocumentData(prev => ({
             ...prev,
-            content: {
-                ...prev.content,
-                entities: [...prev.content.entities, default_entity()]
-            }
-        }));
+            entities: [...prev.entities, default_entity()]
+        }
+        ));
     }
+
+    const deleteEntity = (index: number) => {
+        setDocumentData(prev => ({
+            ...prev,
+            entities: prev.entities.filter((_, i) => i !== index)
+        }));
+    };
 
     return (
         <div>
@@ -107,7 +81,7 @@ export default function EditerDoc({doc, onFinish}: {doc: DHFC_Document, onFinish
                             id="name"
                             type="text"
                             value={documentData.metadata.name}
-                            onChange={(e) => handleInputChange('metadata', 'name', e.target.value)}
+                            onChange={(e) => handleMetadataInputChange('name', e.target.value)}
                         />
                     </div>
 
@@ -117,7 +91,7 @@ export default function EditerDoc({doc, onFinish}: {doc: DHFC_Document, onFinish
                             id="author"
                             type="text"
                             value={documentData.metadata.author}
-                            onChange={(e) => handleInputChange('metadata', 'author', e.target.value)}
+                            onChange={(e) => handleMetadataInputChange('author', e.target.value)}
                         />
                     </div>
 
@@ -129,7 +103,7 @@ export default function EditerDoc({doc, onFinish}: {doc: DHFC_Document, onFinish
                             value={documentData.metadata.date instanceof Date
                                 ? documentData.metadata.date.toISOString().split('T')[0]
                                 : documentData.metadata.date || ''}
-                            onChange={(e) => handleInputChange('metadata', 'date', e.target.value)}
+                            onChange={(e) => handleMetadataInputChange('date', e.target.value)}
                         />
                     </div>
                 </div>)
@@ -138,11 +112,16 @@ export default function EditerDoc({doc, onFinish}: {doc: DHFC_Document, onFinish
             {activeTab === 'content' && (
                 <div>
                     <div>
-                        {documentData.content.entities.map((_, index) => (
+                        {documentData.entities.map((_, index) => (
                             <>
                                 <p>---------</p>
                                 <div key={index}>
-                                    {entityForm(index)}
+                                    # edit entity component
+                                    <EditEntity
+                                        entity={documentData.entities[index]}
+                                        onChange={handleEntityInputChange(index)}
+                                        onSuppr={() => deleteEntity(index)}
+                                    />
                                 </div>
                             </>
                         ))}

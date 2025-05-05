@@ -5,7 +5,7 @@ import { useDocumentContext } from "../DocumentProvider";
 
 export function Dashboard() {
     const navigate = useNavigate();
-    const { documents, deleteDocument, loading, error } = useDocumentContext();
+    const { getDocuments, deleteDocument, loading, error } = useDocumentContext();
 
     const handleDelete = (doc: DHFC_Document) => () => {
         confirmPopup(
@@ -28,6 +28,8 @@ export function Dashboard() {
         );
     }
 
+    const documents = getDocuments();
+
     if (error) {
         return <div>Error: {error}</div>;
     }
@@ -40,8 +42,11 @@ export function Dashboard() {
             <h1>Dashboard</h1>
             <button onClick={() => { navigate("/ajouter") }}>Ajouter un document</button>
             <h2>Documents :</h2>
-            <div className="documents-list">
-                {Object.values(documents).map(doc => makeLine(doc))}
+            <div>
+                {Object.values(documents).length > 0 
+                    ? Object.values(documents).map(doc => makeLine(doc))
+                    : <p>Aucun document</p>
+                }
             </div>
         </div>
     );

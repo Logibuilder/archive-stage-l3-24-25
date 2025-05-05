@@ -8,21 +8,14 @@
 
 Setup :
 ```bash
-python3 -m venv ./.venv          # environnement virtuel
-source ./.venv/bin/activate      # activer l'environnement virtuel
 pip install -r requirements.txt  # installer les dépendances
 ```
 
 Lancer le serveur :
 ```bash
-python3 ./src/server.py --graphdb "http://localhost:7200" 
+python3 ./src/server.py [-v/--verbose] 
 ```
-Il est possible d'utiliser `--fake-api` pour simuler une fausse connexion à GraphDB.
-Ou encore spécifier l'adresse et le port sur lequel tourne le serveur python avec `--host` et `--port`.
-Pour plus d'informations :
-```bash
-python3 ./src/server.py --help
-```
+La configuration du serveur se fait par `config.json`.
 
 ## Serveur GraphDB
 
@@ -46,7 +39,6 @@ podman run -it -p 7200:7200 \
 
 ## Serveur web Python
 ```bash
-source ./.venv/bin/activate
 python3 ./src/server.py
 ```
 

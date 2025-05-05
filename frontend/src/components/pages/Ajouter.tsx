@@ -1,7 +1,7 @@
 import { DHFC_Document } from '../../types';
 import { default_document } from '../../utils';
 import { v4 as uuidv4 } from 'uuid';
-import EditerDoc from '../EditerDoc';
+import EditerDoc from '../forms/EditerDoc';
 import { useNavigate } from 'react-router-dom';
 import { useDocumentContext } from '../DocumentProvider';
 
