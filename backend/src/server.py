@@ -79,7 +79,7 @@ def parse_arguments():
 # TODO : use this
 def init_domain_ontology():
     global domain_ontology
-    domain_ontology = mapOntology(config["db"]["query"])
+    domain_ontology = mapOntology(config["db"]["query_endpoint"])
 
 if __name__ == '__main__':
     parse_arguments()
