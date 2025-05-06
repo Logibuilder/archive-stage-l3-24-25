@@ -490,6 +490,10 @@ def generate(content, documentBaseIRI) :
     """
     result=""
     for key in content :
+        print("la base uri est : ")
+        print(documentBaseIRI)
+        print("la clé est : " )
+        print(key)
         IRI=documentBaseIRI+"#"+key
         result+=IRI+" a <"+content[key]["class"]+">.\n"
         for entry in  content[key]["assertions"] :

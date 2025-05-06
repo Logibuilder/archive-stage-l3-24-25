@@ -5,18 +5,71 @@ import argparse
 import os
 
 from DHFCTools import mapOntology
+from DHFCMonoBuildTools import newAssertionSet
+from DHFCTools import generate
 
 app = Flask(__name__)
 CORS(app)
 
 domain_ontology = {}
 
+
+def addDocument(document):
+
+    #convert json data to dictionary
+    #doc = document
+
+    data = transform(document)
+
+    assertions = generate(data[0], data[1] )
+
+    newAssertionSet(document["metadata"]["name"], document1["metadata"]["author"], assertions)
+    print("document added succesfully")
+
+
+
+
+def transform(document) :
+
+    entity_dic = {}
+    for entity in document["entities"]:
+
+        entity_name = entity["name"]
+
+        entity_type_uri = entity["type_uri"]
+        print("l'entity_name est : " + entity_name)
+        print("l'entity_type_uri est : " +  entity_type_uri)
+
+        assertions = []
+        for assertion in entity["assertions"]:
+            doc_type_url = assertion["property"]
+
+            property = property_uri_to_dic(doc_type_url , entity_type_uri)
+
+            doc_object_name = assertion["object_name"]
+
+            assertion = (
+                doc_type_url,
+                property,
+                doc_object_name
+            )
+
+            assertions.append(assertion)
+
+        assertions_class[entity_name] = {
+            "class" : entity_type_uri,
+            "assertions" : assertions
+        }
+
+
+    tuple = ( assertions_class  , entity_type_uri)
+    return tuple
+
 @app.route('/documents', methods=['GET'])
 def get_documents():
     """Return all documents as JSON"""        
     log("Fetching documents")
-    #documents = getDocuments()
-    documents = {}
+    documents = getDocuments()
     log_json(documents)
     return jsonify(documents)
 
@@ -90,6 +143,51 @@ def init_domain_ontology():
     domain_ontology = mapOntology(config["db"]["query_endpoint"])
 
 if __name__ == '__main__':
+    document = {
+
+
+        "id" : 1,
+        "metadata" : {
+            "name" : "name1",
+            "author" : "auteur",
+            "date" : "auj",
+        },
+
+        "entities" : [{
+            "name" : "name1",
+            "type_uri" : "https://naszareck.fr/ontology#Person",
+            "assertions" : [
+                {
+                    "property" : "https://naszareck.fr/ontology#possesses",
+                    "object_name" : "name1",
+                },
+                ]
+        }]
+    }
+
+    document1 = {
+        "id": 1,
+        "metadata": {
+            "name": "name1",
+            "author": "auteur",
+            "date": "auj"
+        },
+        "entities": [
+            {
+                "name": "name1",
+                "type_uri": "https://naszareck.fr/ontology#Person",
+                "assertions": [
+                    {
+                        "property": "https://naszareck.fr/ontology#possesses",
+                        "object_name": "name1"
+                    }
+                ]
+            }
+        ]
+    }
+
     parse_arguments()
     init_domain_ontology()
+    print(json.dumps(domain_ontology, indent=4))
+    addDocument(document1)
     app.run(debug=True, host=config["host"], port=config["port"])
