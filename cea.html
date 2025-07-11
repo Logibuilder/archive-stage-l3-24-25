@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Description de l'environnement CEA</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            background-color: #ffffff;
+            color: #333;
+        }
+
+        h1 {
+            color: #0055a5;
+        }
+
+        h2 {
+            color: #B22222;
+            margin-top: 30px;
+        }
+
+        ul {
+            line-height: 1.6;
+        }
+
+        code {
+            background-color: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .env-path {
+            font-style: italic;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Environnement Python utilisé pour la méthode CEA</h1>
+
+    <h2>Objectif</h2>
+    <p>
+        Cet environnement virtuel Python a été mis en place pour exécuter la méthode <strong>CEA</strong> (Cross-lingual Entity Alignment).
+    </p>
+
+    <h2>Bibliothèques essentielles à la méthode CEA</h2>
+  <table border="1" cellpadding="6" cellspacing="0">
+    <thead>
+      <tr>
+        <th>Package</th>
+        <th>Version</th>
+        <th>Rôle</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>tensorflow</td><td>1.15.0</td><td>Framework de machine learning</td></tr>
+      <tr><td>tensorflow-estimator</td><td>1.15.1</td><td>API pour entraîner les modèles</td></tr>
+      <tr><td>tensorboard</td><td>1.15.0</td><td>Visualisation de l'entraînement</td></tr>
+      <tr><td>numpy</td><td>1.21.6</td><td>Calcul numérique</td></tr>
+      <tr><td>scipy</td><td>1.7.3</td><td>Fonctions mathématiques avancées</td></tr>
+      <tr><td>protobuf</td><td>3.20.3</td><td>Sérialisation des données (TensorFlow)</td></tr>
+    </tbody>
+  </table>
+  <section>
+    <h2>Prétraitement des graphes RDF</h2>
+
+    <article>
+        <h3>Script : convert_ttl_to_cea_format.py</h3>
+        <p>
+        Ce script transforme un graphe de connaissances au format <code>.ttl</code> en fichiers exploitables pour l’alignement d’entités. 
+        Il est exécuté séparément pour chaque graphe (source et cible).
+        </p>
+        <ul>
+        <li>Chargement du graphe RDF avec <code>rdflib</code></li>
+        <li>Extraction des entités et relations sous forme d'URI</li>
+        <li>Attribution d’un identifiant numérique à chaque entité et relation</li>
+        <li>Génération des fichiers :
+            <ul>
+            <li><code>ent_ids_X</code> et <code>rel_ids_X</code> (listes des entités et relations avec leurs IDs)</li>
+            <li><code>triples_X</code> (triplets RDF encodés en IDs)</li>
+            <li><code>entityXid.json</code> et <code>relationXid.json</code> (dictionnaires d’identifiants) qui seront utilisés pour générer le ficihier des liaisons internes(ent_links)</li>
+            </ul>
+        </li>
+        </ul>
+        <p><strong>X = 1 ou 2</strong> selon le graphe traité.</p>
+    </article>
+    <article>
+    <h3>Script : generate_ref_ent_ids.py génération du fichier <code>ref_ent_ids</code></h3>
+    <p>
+        Ce script identifie les entités communes entre deux graphes RDF déjà transformés, en comparant leurs URIs dans les fichiers <code>entity1id.json</code> et <code>entity2id.json</code>.
+    </p>
+    <ul>
+        <li>Charge les deux dictionnaires d'entités (URI → ID)</li>
+        <li>Repère les URIs présentes dans les deux graphes</li>
+        <li>Crée pour chaque URI commune une paire <code>ID_source</code> ↔ <code>ID_cible</code></li>
+        <li>Sauvegarde ces paires dans le fichier <code>ref_ent_ids</code> au format : <code>ID_source[TAB]ID_cible</code></li>
+    </ul>
+    <p>
+        Ce fichier sert de référence pour évaluer les performances de l’algorithme d’alignement d'entités (précision, rappel, etc.).
+    </p>
+    </article>
+
+    <article>
+        <h3>Script : <code>generate_name_vec.py</code></h3>
+        <p>
+            Ce script associe à chaque entité un vecteur de représentation (par exemple, une représentation sémantique ou structurelle),
+            et enregistre ces associations dans un fichier texte exploitable par les algorithmes d’alignement.
+        </p>
+        <ul>
+            <li>Charge les vecteurs depuis <code>{lang}_vectorList.json</code></li>
+            <li>Lit les entités dans <code>ent_ids_1</code> et <code>ent_ids_2</code></li>
+            <li>Associe chaque entité à son vecteur</li>
+            <li>Écrit les paires index - ID d'entité - vecteur dans <code>name_vec.txt</code></li>
+        </ul>
+        <p>
+            Ce fichier <code>name_vec </code>est une entrée attendu par l'algorithme.
+        </p>
+    </article>
+    <article>
+        <h2>Lancer l'apprentissage</h2>
+        <p>
+            Pour lancer l'apprentissage avec l'un des jeux de données de démonstration :
+        </p>
+        <ol>
+            <li>Définir les graphes à utiliser dans le fichier <code>config.py</code>.</li>
+            <li>Exécuter la commande suivante :
+                <pre><code>python main.py</code></pre>
+            </li>
+        </ol>
+    </article>
+
+    <article>
+        <h2>Accès au code source</h2>
+        <p>
+            Voici les liens permettant d'accéder aux différentes versions du code :
+        </p>
+        <ul>
+            <li>
+                Code source original du projet : 
+                <a href="https://github.com/DexterZeng/CEA/blob/master/README.md" target="_blank">Lien vers le dépôt</a>
+            </li>
+            <li>
+                Code après transformation et adaptation : 
+                <a href="https://drive.google.com/drive/folders/1Bf2Sq1yaM7EFPbLX30LZkwDICmsvoCb2?usp=drive_link" target="_blank">Lien vers l'archive</a>
+            </li>
+        </ul>
+    </article>
+
+
+  </section>
+</body>
+</html>

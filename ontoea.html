@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Description de l'environnement OntoEA</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            background-color: #ffffff;
+            color: #333;
+        }
+
+        h1 {
+            color: #0055a5;
+        }
+
+        h2 {
+            color: #B22222;
+            margin-top: 30px;
+        }
+
+        ul {
+            line-height: 1.6;
+        }
+
+        code {
+            background-color: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .env-path {
+            font-style: italic;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Environnement Python utilisé pour la méthode OntoEA</h1>
+
+
+    <h2>Objectif</h2>
+    <p>
+        Cet environnement virtuel Python a été mis en place pour exécuter la méthode <strong>OntoEA</strong>. 
+    </p>
+
+    <h2>Bibliothèques essentielles à la méthode CEA</h2>
+  <article>
+  <h2>Bibliothèques Python utilisées</h2>
+  <table border="1" cellpadding="6" cellspacing="0">
+    <thead>
+      <tr>
+        <th>Bibliothèque</th>
+        <th>Version</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>rdflib</strong></td>
+        <td>5.0.0</td>
+        <td>Manipulation des graphes RDF (chargement, requêtes, sérialisation)</td>
+      </tr>
+      <tr>
+        <td><strong>rapidfuzz</strong></td>
+        <td>2.11.1</td>
+        <td>Calcul rapide des similarités textuelles (meilleure alternative à fuzzywuzzy)</td>
+      </tr>
+      <tr>
+        <td><strong>fuzzywuzzy</strong></td>
+        <td>0.18.0</td>
+        <td>Comparaison floue de chaînes de caractères</td>
+      </tr>
+      <tr>
+        <td><strong>python-levenshtein</strong></td>
+        <td>0.21.1</td>
+        <td>Calcul des distances d'édition (utilisé par fuzzywuzzy)</td>
+      </tr>
+      <tr>
+        <td><strong>tensorflow</strong></td>
+        <td>1.14.0</td>
+        <td>Framework d’apprentissage automatique utilisé pour l’alignement</td>
+      </tr>
+      <tr>
+        <td><strong>tensorflow-estimator</strong></td>
+        <td>1.14.0</td>
+        <td>Suivi et gestion de l'entraînement des modèles TensorFlow</td>
+      </tr>
+      
+      <tr>
+        <td><strong>scikit-learn</strong></td>
+        <td>0.24.2</td>
+        <td>Outils de machine learning classiques</td>
+      </tr>
+      <tr>
+        <td><strong>scipy</strong></td>
+        <td>1.5.4</td>
+        <td>Fonctions scientifiques et algébriques</td>
+      </tr>
+      <tr>
+        <td><strong>numpy</strong></td>
+        <td>1.19.5</td>
+        <td>Calcul matriciel et manipulation de tableaux</td>
+      </tr>
+      <tr>
+        <td><strong>pandas</strong></td>
+        <td>1.1.5</td>
+        <td>Traitement de données tabulaires</td>
+      </tr>
+      <tr>
+        <td><strong>matplotlib</strong></td>
+        <td>3.3.4</td>
+        <td>Création de graphiques</td>
+      </tr>
+      
+      <tr>
+        <td><strong>tqdm</strong></td>
+        <td>4.64.1</td>
+        <td>Affichage de barres de progression</td>
+      </tr>
+    </tbody>
+  </table>
+</article>
+
+  <section>
+    <h2>Prétraitement des graphes RDF</h2>
+    <article>
+        <h3>Script : <code>replaceVrsionByEntity.py</h3>
+        <p>
+            Ce script fusionne deux graphes RDF : l’un contenant les entités avec leurs versions (<code>hasVersion_outputX.ttl(obtenu par le script <code>extractHasVersion.py</code>)), 
+            et l’autre contenant des triplets faisant référence à ces versions (<code>graphe_X(1 ou 2).ttl</code>).
+        </p>
+
+        <p>
+            Il remplace les URI de versions par les URI des entités correspondantes dans tous les triplets, 
+            sauf ceux liés à <code>hasVersion</code> et <code>validityPeriod</code>, qui sont ignorés.
+        </p>
+
+        <p>
+            Le graphe résultant, sans références aux versions, est enregistré dans le fichier <code>nutWithoutVersionX.ttl</code>.
+        </p>
+
+        <p>
+        <strong>Important :</strong> ce graphe de connaissance nettoyé doit être utilisé pour générer <strong>tous les fichiers d’entrée</strong> 
+        des étapes suivantes (extraction de triplets d'attribut , extraction de triplets de relation, etc.).
+        </p>
+    </article>
+
+
+    <article>
+        <h3>Script : extract_attr_tripes.py</h3>
+        <p>
+            Ce script extrait les triplets RDF dont le prédicat contient certains mots-clés (comme <code>label</code> ou <code>idValue</code>),
+            quels que soient les préfixes utilisés.
+        </p>
+
+        <p>
+            L'extraction doit être réalisée pour <strong>chaque graphe de connaissance</strong> utilisé dans le processus.
+            Les résultats sont enregistrés dans le fichier <code>attr_triples_X( graphe 1 ou 2)</code>.
+        </p>
+
+        
+    </article>
+
+    <article>
+    <article>
+        <h3>Script : extract_rel_tripes.py</h3>
+        <p>
+            Ce script extrait les triplets RDF dont le prédicat(les pédicats qui définissent les relations entre les relations entre les entités) contient certains mots-clés (par exemple <code>isMemberOf</code>, <code>hasSubUnit</code>, <code>type</code>),
+            sans tenir compte des préfixes.
+        </p>
+
+        <p>
+            L’extraction doit être effectuée pour <strong>chaque graphe de connaissance</strong> utilisé.
+            Les triplets extraits sont enregistrés dans le fichier <code>rel_triples_X( graphe 1 ou 2)</code>.
+        </p>
+
+        
+    </article>
+
+
+    <article>
+        <h3>Script : <code>get_ent_links.py</code></h3>
+        <p>
+            Ce script analyse les deux graphes de connaissance (ex. <code>NUTS</code> et <code>NUTS2</code>) pour détecter des liens internes entre entités.
+            Il compare les labels des entités en utilisant un algorithme de similarité textuelle (RapidFuzz).
+        </p>
+
+        <p>
+            Les labels sont préalablement normalisés (suppression des accents, minuscules, nettoyage) avant la comparaison.
+            Seules les paires d'entités avec une similarité supérieure à un seuil (ici 50%) sont conservées.
+        </p>
+
+        <p>
+            Les résultats sont enregistrés dans le fichier <code>ent_links</code>, contenant les URI des entités liées
+        </p>
+    </article>
+    
+
+
+    <article>
+        <h2>Accès au code source</h2>
+        <p>
+            Voici les liens permettant d'accéder aux différentes versions du code :
+        </p>
+        <ul>
+            <li>
+                Code source original du projet : 
+                <a href="https://github.com/ZihengZZH/OntoEA/blob/main/README.md" target="_blank">Lien vers le dépôt</a>
+            </li>
+            <li>
+                Code après transformation et adaptation : 
+                <a href="https://drive.google.com/drive/folders/1Xpb-mHH-E3h8jsQvI7RN1HifDxTZPtI0?usp=drive_link" target="_blank">Lien vers l'archive</a>
+            </li>
+        </ul>
+    </article>
+
+
+  </section>
+</body>
+</html>
