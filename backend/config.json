@@ -1,8 +1,0 @@
-{
-    "host": "localhost",
-    "port": 5000,
-    "db": {
-        "query_endpoint": "http://localhost:7200/repositories/test",
-        "update_endpoint": "http://localhost:7200/repositories/test/statements"
-    }
-}

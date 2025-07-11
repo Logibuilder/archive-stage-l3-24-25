@@ -1,6 +1,0 @@
-nuts:V1999_L0_UK a tsn:UnitVersion ;
-	tsn:hasName "UNITED KINGDOM" ;
-	tsn:isVersionOf nuts:L0_UK ;
-	tsn:hasSuperFeature nuts:V1999_Territory_EU ;
-	tsn:hasSubFeature nuts:V1999_L1_UKC , nuts:V1999_L1_UKM , nuts:V1999_L1_UKK , nuts:V1999_L1_UKH , nuts:V1999_L1_UKI , nuts:V1999_L1_UKN ;
-	tsn:isMemberOf nuts:V1999_L0 .
