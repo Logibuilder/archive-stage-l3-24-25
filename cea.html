@@ -4,38 +4,101 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Description de l'environnement CEA</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 40px;
-            background-color: #ffffff;
-            color: #333;
-        }
+   <style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #ffffff;
+        color: #333;
+        margin: 20px;
+    }
 
-        h1 {
-            color: #0055a5;
-        }
+    nav {
+        background-color: #0055a5;
+        padding: 10px;
+        margin-bottom: 20px;
+    }
 
-        h2 {
-            color: #B22222;
-            margin-top: 30px;
-        }
+    nav ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        gap: 20px;
+    }
 
-        ul {
-            line-height: 1.6;
-        }
+    nav ul li {
+        display: inline;
+    }
 
-        code {
-            background-color: #f4f4f4;
-            padding: 2px 6px;
-            border-radius: 4px;
-        }
+    nav a {
+        color: white;
+        text-decoration: none;
+        font-weight: bold;
+    }
 
-        .env-path {
-            font-style: italic;
-            color: #666;
-        }
-    </style>
+    nav a:hover {
+        text-decoration: underline;
+    }
+
+    .active {
+        text-decoration: underline;
+        text-decoration-color: white;
+    }
+    header {
+        margin-bottom: 30px;
+    }
+
+    h1 {
+        color: #0055a5;
+    }
+
+    h2 {
+        color: #B22222;
+        margin-top: 30px;
+    }
+
+    h3 {
+        margin-top: 20px;
+    }
+
+    ul {
+        padding-left: 20px;
+        line-height: 1.6;
+    }
+
+    code {
+        background-color: #f4f4f4;
+        padding: 2px 5px;
+        border-radius: 3px;
+        font-family: Consolas, monospace;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 15px;
+    }
+
+    th, td {
+        border: 1px solid #ccc;
+        padding: 8px;
+        text-align: left;
+    }
+
+    th {
+        background-color: #e0e0e0;
+    }
+
+    tr:nth-child(even) {
+        background-color: #f9f9f9;
+    }
+
+    article {
+        margin-top: 30px;
+    }
+</style>
+
+
 </head>
 <body>
     <nav>
@@ -43,7 +106,7 @@
             <li><a href="index.html">Accueil</a></li>
             <li><a href="paris.html">PARIS</a></li>
             <li><a href="ontoea.html">OntoEA</a></li>
-            <li><a href="cea.html">CEA</a></li>
+            <li class="active" ><a href="cea.html">CEA</a></li>
         </ul>
     </nav>
     <header>
